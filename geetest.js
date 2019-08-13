@@ -56,7 +56,7 @@ const PNG = require('pngjs').PNG;
     const { width, height } = img1;
     const diff = new PNG({ width, height });
 
-    let info = pixelmatch(img1.data, img2.data, diff.data, width, height, { threshold: 0.4 });
+    let info = pixelmatch(img1.data, img2.data, diff.data, width, height, { threshold: 0.3 });
 
     await fs.writeFileSync('diff.png', PNG.sync.write(diff));
 
@@ -93,23 +93,31 @@ const PNG = require('pngjs').PNG;
     page.mouse.up();
     
     
-
+    await page.waitForNavigation();
+    await page.click('.old-entry', {delay:10});
     // console.log(page.url())
     
     // await browser.close();
     function* generator(distance) {
-        const a = 10;
+        let a = 10;
         let t = 5;
         let steps = 0;
         let slice_distance = [];
         let current_distance = 0;
 
-        if(distance < 100){
+        if (distance < 70) {
+            a = 14
             t = 3
+        } else if (distance < 100) {
+            t = 3
+        } else if (distance > 140) {
+            a = 12
+        } else {
+            a = 8
         }
         
         v0 = a * t;
-        // 减速分成2步,匀减速直线运动
+
         while (steps < t) {
             steps++;
             current_distance = v0 * steps - (1 / 2) * a * steps * steps;
