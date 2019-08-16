@@ -80,13 +80,9 @@ const PNG = require('pngjs').PNG;
             red = Math.min(...redPoints);
         });
     await page.waitFor(2000);
-    console.log('red',red)
+    console.log('需要滑动距离',red)
     for (let item of generator(red)) {
         console.log(item)
-        // if(item > red){
-        //     await page.mouse.move(geetBtnBounding.x + geetBtnBounding.width / 2 + red - 7, geetBtnBounding.y + geetBtnBounding.height / 2,{steps:5});
-        //     break;
-        // }
         await page.mouse.move(geetBtnBounding.x + geetBtnBounding.width / 2 + item - 7, geetBtnBounding.y + geetBtnBounding.height / 2,{steps:7});
     }
     await page.waitFor(500)
@@ -94,33 +90,30 @@ const PNG = require('pngjs').PNG;
     
     
     await page.waitForNavigation();
-    await page.click('.old-entry', {delay:10});
+    await page.click('.old-entry', { clickCount: 2});
     // console.log(page.url())
     
     // await browser.close();
     function* generator(distance) {
-        let a = 10;
-        let t = 5;
+        // 匀减速运动
+        let a = 12; //加速度
+        let t = 5;  //分5步滑到位置
         let steps = 0;
         let slice_distance = [];
         let current_distance = 0;
 
-        if (distance < 70) {
-            a = 14
-            t = 3
-        } else if (distance < 100) {
-            t = 3
-        } else if (distance > 140) {
-            a = 12
-        } else {
-            a = 8
+        if(distance >= 116){
+            a = 14; //远距离的时候加速度适当增加
         }
-        
-        v0 = a * t;
+
+        v0 = Math.round((distance + 1 / 2 * a * t * t) / t);  //计算初始速度, 取整是为了留一定偏移量
 
         while (steps < t) {
             steps++;
             current_distance = v0 * steps - (1 / 2) * a * steps * steps;
+            if(current_distance == distance ){
+                continue;
+            }
             slice_distance.push(current_distance);
         }
         slice_distance.push(distance);
